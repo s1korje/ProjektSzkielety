@@ -47,3 +47,4 @@ Desktop.ini
 
 *.tmp
 *.bak
+*.sqlite3

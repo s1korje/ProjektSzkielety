@@ -1,6 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
 
 
 def home(request):
-    return HttpResponse("Strona główna")
+    return render(request, 'core/home.html', {'tytul': 'Strona główna', 'items': ['a', 'b', 'c']})

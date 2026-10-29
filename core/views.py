@@ -40,7 +40,7 @@ def event_detail(request, event_id):
         "event": event,
     })
 
-
+@staff_member_required
 def event_create(request):
     if request.method == "POST":
         form = EventForm(request.POST)

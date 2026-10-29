@@ -19,6 +19,19 @@ class EventForm(forms.ModelForm):
             "is_online",
             "website",
         ]
+        labels = {
+            "title": "Nazwa wydarzenia",
+            "description": "Opis",
+            "game": "Gra",
+            "organizer": "Organizator",
+            "event_type": "Rodzaj wydarzenia",
+            "status": "Status",
+            "start_date": "Data rozpoczęcia",
+            "end_date": "Data zakończenia",
+            "location": "Lokalizacja",
+            "is_online": "Wydarzenie online",
+            "website": "Strona internetowa",
+        }
 
         widgets = {
             "title": forms.TextInput(attrs={
@@ -81,6 +94,11 @@ class GameForm(forms.ModelForm):
                 "rows": 4,
             }),
         }
+        labels = {
+            "name": "Nazwa gry",
+            "genre": "Gatunek",
+            "description": "Opis gry",
+        }
 
 
 class OrganizerForm(forms.ModelForm):
@@ -97,6 +115,11 @@ class OrganizerForm(forms.ModelForm):
             "website": forms.URLInput(attrs={
                 "class": "form-control",
             }),
+        }
+        labels = {
+            "name": "Nazwa organizatora",
+            "email": "Adres e-mail",
+            "website": "Strona internetowa",
         }
 
 

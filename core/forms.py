@@ -1,6 +1,6 @@
 
 from django import forms
-from .models import Event
+from .models import Event,Game,Organizer
 
 
 class EventForm(forms.ModelForm):
@@ -65,10 +65,47 @@ class EventForm(forms.ModelForm):
             }),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class GameForm(forms.ModelForm):
+    class Meta:
+        model = Game
+        fields = ["name", "genre", "description"]
+        widgets = {
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+            }),
+            "genre": forms.TextInput(attrs={
+                "class": "form-control",
+            }),
+            "description": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 4,
+            }),
+        }
 
-        date_format = "%Y-%m-%dT%H:%M"
 
-        self.fields["start_date"].input_formats = [date_format]
-        self.fields["end_date"].input_formats = [date_format]
+class OrganizerForm(forms.ModelForm):
+    class Meta:
+        model = Organizer
+        fields = ["name", "email", "website"]
+        widgets = {
+            "name": forms.TextInput(attrs={
+                "class": "form-control",
+            }),
+            "email": forms.EmailInput(attrs={
+                "class": "form-control",
+            }),
+            "website": forms.URLInput(attrs={
+                "class": "form-control",
+            }),
+        }
+
+
+
+
+def __init__(self, *args, **kwargs):
+    super().__init__(*args, **kwargs)
+
+    date_format = "%Y-%m-%dT%H:%M"
+
+    self.fields["start_date"].input_formats = [date_format]
+    self.fields["end_date"].input_formats = [date_format]

@@ -1,0 +1,92 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Mój profil | Planer e-sportowy{% endblock %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="row justify-content-center">
+
+        <div class="col-md-8 col-lg-6">
+
+            <div class="card shadow-sm border-0">
+
+                <div class="card-body text-center p-4">
+
+                    <!-- Zdjęcie profilowe -->
+                    {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}"
+                             alt="Zdjęcie profilowe"
+                             class="rounded-circle mb-3"
+                             width="140"
+                             height="140"
+                             style="object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary text-white
+                                    d-flex align-items-center justify-content-center
+                                    mx-auto mb-3"
+                             style="width: 140px; height: 140px;">
+                            <span class="display-4">
+                                {{ profile.first_name|first|default:profile.user.username|first|upper }}
+                            </span>
+                        </div>
+                    {% endif %}
+
+                    <!-- Dane użytkownika -->
+                    <h2 class="fw-bold mb-1">
+                        {{ profile.first_name }}
+                        {{ profile.last_name }}
+                    </h2>
+
+                    <p class="text-muted mb-3">
+                        @{{ profile.user.username }}
+                    </p>
+
+                    <p class="text-secondary">
+                        {{ profile.user.email }}
+                    </p>
+
+                    <hr>
+
+                    <!-- Opis -->
+                    <h5 class="fw-semibold">O mnie</h5>
+
+                    <p class="text-muted">
+                        {{ profile.bio|default:"Użytkownik nie dodał jeszcze opisu."|linebreaksbr }}
+                    </p>
+
+                    <hr>
+
+                    <!-- Data utworzenia konta -->
+                    <p class="small text-muted mb-4">
+                        Dołączył:
+                        {{ profile.created_at|date:"d.m.Y" }}
+                    </p>
+
+                    <!-- Przyciski -->
+                    <div class="d-flex justify-content-center gap-2">
+
+                        <a href="{% url 'edit_profile' %}"
+                           class="btn btn-primary">
+                            Edytuj profil
+                        </a>
+
+                        <a href="{% url 'home' %}"
+                           class="btn btn-outline-secondary">
+                            Strona główna
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

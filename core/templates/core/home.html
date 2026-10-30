@@ -1,6 +1,75 @@
 {% extends 'core/base.html' %}
-{% block title %}Tresc{% endblock %}
+
+{% block title %}Strona główna{% endblock %}
 
 {% block content %}
-<h1 class="mb-3">Przyszla tresc</h1>
+
+<div class="p-5 mb-4 bg-light rounded-3">
+    <div class="container-fluid py-3">
+        <h1 class="display-5 fw-bold">Planer wydarzeń e-sportowych</h1>
+        <p class="col-md-8 fs-5">
+            Przeglądaj wydarzenia e-sportowe, poznawaj turnieje
+            i zarządzaj swoją bazą wydarzeń.
+        </p>
+
+        <a href="{% url 'event_list' %}" class="btn btn-primary btn-lg">
+            Przeglądaj wydarzenia
+        </a>
+    </div>
+</div>
+
+<h2 class="mb-3">Co chcesz zrobić?</h2>
+
+<div class="row g-4">
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Wydarzenia</h5>
+                <p class="card-text">
+                    Zobacz listę wydarzeń e-sportowych i sprawdź ich szczegóły.
+                </p>
+                <a href="{% url 'event_list' %}" class="btn btn-primary">
+                    Zobacz wydarzenia
+                </a>
+                <a href="{% url 'event_create' %}"
+                   class="btn btn-outline-primary mt-2">
+                    Dodaj wydarzenie
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_staff %}
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Gry</h5>
+                <p class="card-text">
+                    Dodawaj gry, które będą dostępne w formularzu wydarzeń.
+                </p>
+                <a href="{% url 'game_create' %}" class="btn btn-success">
+                    Dodaj grę
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Organizatorzy</h5>
+                <p class="card-text">
+                    Dodawaj organizatorów turniejów i innych wydarzeń.
+                </p>
+                <a href="{% url 'organizer_create' %}" class="btn btn-success">
+                    Dodaj organizatora
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
 {% endblock %}

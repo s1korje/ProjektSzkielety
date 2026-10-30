@@ -1,4 +1,5 @@
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
@@ -23,7 +24,7 @@ def register(request):
     else:
         form = UserCreationForm()
 
-    return render(request, 'register.html', {
+    return render(request, 'core/register.html', {
         'form': form
     })
 
@@ -43,7 +44,7 @@ def user_login(request):
     else:
         form = AuthenticationForm()
 
-    return render(request, 'login.html', {
+    return render(request, 'core/login.html', {
         'form': form
     })
 
@@ -51,6 +52,7 @@ def user_logout(request):
     logout(request)
     return redirect('login')
 
+@login_required
 def event_list(request):
     events = Event.objects.select_related(
         "game", "organizer"
@@ -71,7 +73,7 @@ def event_list(request):
         "query": query,
     })
 
-
+@login_required
 def event_detail(request, event_id):
     event = get_object_or_404(
         Event.objects.select_related("game", "organizer"),

@@ -1,6 +1,9 @@
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
+
 
 from .models import Event
 from .forms import EventForm,GameForm, OrganizerForm
@@ -8,6 +11,45 @@ from .forms import EventForm,GameForm, OrganizerForm
 def home(request):
     return render(request, 'core/home.html', {'tytul': 'Strona główna', 'items': ['a', 'b', 'c']})
 
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+
+    else:
+        form = UserCreationForm()
+
+    return render(request, 'register.html', {
+        'form': form
+    })
+
+def user_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(
+            request,
+            data=request.POST
+        )
+
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            return redirect('home')
+
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'login.html', {
+        'form': form
+    })
+
+def user_logout(request):
+    logout(request)
+    return redirect('login')
 
 def event_list(request):
     events = Event.objects.select_related(

@@ -26,5 +26,9 @@ urlpatterns = [
     path("events/<int:event_id>/",views.event_detail,name="event_detail",),
     path("games/add/", views.game_create, name="game_create"),
     path("organizers/add/", views.organizer_create, name="organizer_create"),
+    path('register/', views.register, name='register'),
+    path('login/', views.user_login, name='login'),
+    path('logout/', views.user_logout, name='logout'),
 ]
+
 

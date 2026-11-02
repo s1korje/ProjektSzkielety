@@ -1,6 +1,125 @@
 
 from django import forms
-from .models import Event,Game,Organizer
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from .models import Profile, Event, Game, Organizer
+
+class RegisterForm(UserCreationForm):
+
+    email = forms.EmailField(
+        required=True,
+        label="Adres e-mail"
+    )
+
+    first_name = forms.CharField(
+        max_length=100,
+        required=True,
+        label="Imię"
+    )
+
+    last_name = forms.CharField(
+        max_length=100,
+        required=True,
+        label="Nazwisko"
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'email',
+            'first_name',
+            'last_name',
+            'password1',
+            'password2'
+        ]
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError(
+                "Ten adres e-mail jest już zajęty."
+            )
+
+        return email
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        user.email = self.cleaned_data['email']
+
+        if commit:
+            user.save()
+
+            Profile.objects.create(
+                user=user,
+                first_name=self.cleaned_data['first_name'],
+                last_name=self.cleaned_data['last_name']
+            )
+
+        return user
+
+
+class ProfileForm(forms.ModelForm):
+
+    email = forms.EmailField(
+        required=True,
+        label="Adres e-mail"
+    )
+
+    class Meta:
+        model = Profile
+
+        fields = [
+            'first_name',
+            'last_name',
+            'bio',
+            'avatar'
+        ]
+
+        labels = {
+            'first_name': 'Imię',
+            'last_name': 'Nazwisko',
+            'bio': 'O mnie',
+            'avatar': 'Zdjęcie profilowe'
+        }
+
+        widgets = {
+            'bio': forms.Textarea(attrs={
+                'rows': 4,
+                'placeholder': 'Napisz coś o sobie...'
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.pk:
+            self.fields['email'].initial = self.instance.user.email
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+
+        users = User.objects.filter(email__iexact=email)
+        users = users.exclude(pk=self.instance.user.pk)
+
+        if users.exists():
+            raise forms.ValidationError(
+                "Ten adres e-mail jest już zajęty."
+            )
+
+        return email
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+
+        if commit:
+            profile.user.email = self.cleaned_data['email']
+            profile.user.save()
+            profile.save()
+
+        return profile
 
 
 class EventForm(forms.ModelForm):
@@ -132,3 +251,8 @@ def __init__(self, *args, **kwargs):
 
     self.fields["start_date"].input_formats = [date_format]
     self.fields["end_date"].input_formats = [date_format]
+
+    for field in self.fields.values():
+        field.widget.attrs.update({
+            'class': 'form-control'
+        })

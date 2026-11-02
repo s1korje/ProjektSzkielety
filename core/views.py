@@ -1,14 +1,121 @@
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q
+from .forms import RegisterForm, ProfileForm
+from .models import Profile
+
 
 from .models import Event
 from .forms import EventForm,GameForm, OrganizerForm
 
+class CustomLoginView(LoginView):
+
+    template_name = 'core/user/login.html'
+
+    redirect_authenticated_user = True
+
 def home(request):
     return render(request, 'core/home.html', {'tytul': 'Strona główna', 'items': ['a', 'b', 'c']})
 
+def register(request):
 
+    if request.user.is_authenticated:
+        return redirect('profile')
+
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+
+            messages.success(
+                request,
+                'Konto zostało utworzone!'
+            )
+
+            return redirect('profile')
+
+    else:
+        form = RegisterForm()
+
+    return render(request, 'core/user/register.html', {
+        'form': form
+    })
+
+def user_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(
+            request,
+            data=request.POST
+        )
+
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            return redirect('profile')
+
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'core/user/login.html', {
+        'form': form
+    })
+
+@login_required
+def user_logout(request):
+    logout(request)
+    return redirect('login')
+
+@login_required
+def profile(request):
+
+    user_profile, created = Profile.objects.get_or_create(
+        user=request.user
+    )
+
+    return render(request, 'core/user/profile.html', {
+        'profile': user_profile
+    })
+
+@login_required
+def edit_profile(request):
+
+    user_profile, created = Profile.objects.get_or_create(
+        user=request.user
+    )
+
+    if request.method == 'POST':
+        form = ProfileForm(
+            request.POST,
+            request.FILES,
+            instance=user_profile
+        )
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(
+                request,
+                'Profil został zaktualizowany!'
+            )
+
+            return redirect('profile')
+
+    else:
+        form = ProfileForm(instance=user_profile)
+
+    return render(request, 'core/user/edit_profile.html', {
+        'form': form
+    })
+
+@login_required
 def event_list(request):
     events = Event.objects.select_related(
         "game", "organizer"
@@ -29,7 +136,7 @@ def event_list(request):
         "query": query,
     })
 
-
+@login_required
 def event_detail(request, event_id):
     event = get_object_or_404(
         Event.objects.select_related("game", "organizer"),

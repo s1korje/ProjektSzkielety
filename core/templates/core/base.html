@@ -44,7 +44,9 @@
                    href="{% url 'profile' %}">
                     Mój profil
                 </a>
-
+                <a class="nav-link text-light" href="{% url 'my_plan' %}">
+                    Mój plan
+                </a>
                 <form method="POST" action="{% url 'logout' %}" class="d-inline">
                     {% csrf_token %}
 

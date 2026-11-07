@@ -5,12 +5,9 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Count
 from .forms import RegisterForm, ProfileForm
-from .models import Profile
-
-
-from .models import Event
+from .models import Profile, Event, PlannedEvent
 from .forms import EventForm,GameForm, OrganizerForm
 
 class CustomLoginView(LoginView):
@@ -119,7 +116,9 @@ def edit_profile(request):
 def event_list(request):
     events = Event.objects.select_related(
         "game", "organizer"
-    ).all()
+    ).annotate(
+        planned_count=Count("user_plans")
+    )
 
     query = request.GET.get("q", "").strip()
 
@@ -139,7 +138,11 @@ def event_list(request):
 @login_required
 def event_detail(request, event_id):
     event = get_object_or_404(
-        Event.objects.select_related("game", "organizer"),
+        Event.objects.select_related(
+            "game", "organizer"
+        ).annotate(
+            planned_count=Count("user_plans")
+        ),
         pk=event_id,
     )
 
@@ -190,3 +193,50 @@ def organizer_create(request):
         "form": form,
         "page_title": "Dodaj organizatora",
     })
+
+from django.views.decorators.http import require_POST
+
+
+@login_required
+@require_POST
+def add_to_plan(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+
+    planned_event, created = PlannedEvent.objects.get_or_create(
+        user=request.user,
+        event=event,
+    )
+
+    if created:
+        messages.success(request, "Wydarzenie dodano do Twojego planu!")
+    else:
+        messages.info(request, "To wydarzenie jest już w Twoim planie.")
+
+    return redirect("event_detail", event_id=event.id)
+
+
+@login_required
+def my_plan(request):
+    planned_events = PlannedEvent.objects.filter(
+        user=request.user
+    ).select_related("event", "event__game", "event__organizer")
+
+    return render(request, "events/my_plan.html", {
+        "planned_events": planned_events,
+    })
+
+
+@login_required
+@require_POST
+def remove_from_plan(request, event_id):
+    planned_event = get_object_or_404(
+        PlannedEvent,
+        user=request.user,
+        event_id=event_id,
+    )
+
+    planned_event.delete()
+
+    messages.success(request, "Wydarzenie usunięto z Twojego planu.")
+
+    return redirect("my_plan")

@@ -1,0 +1,64 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Mój plan wydarzeń{% endblock %}
+
+{% block content %}
+
+<h1 class="mb-4">Mój plan wydarzeń</h1>
+
+<div class="row g-3">
+
+    {% for planned in planned_events %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        {{ planned.event.title }}
+                    </h5>
+
+                    <p>
+                        Gra: {{ planned.event.game.name }}
+                    </p>
+
+                    <p>
+                        Organizator: {{ planned.event.organizer.name }}
+                    </p>
+
+                    <p>
+                        Data:
+                        {{ planned.event.start_date|date:"d.m.Y H:i" }}
+                    </p>
+
+                    <a href="{% url 'event_detail' planned.event.id %}"
+                       class="btn btn-outline-primary">
+                        Szczegóły
+                    </a>
+
+                    <form method="post"
+                          action="{% url 'remove_from_plan' planned.event.id %}"
+                          class="mt-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            Usuń z planu
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                Nie masz jeszcze żadnych zaplanowanych wydarzeń.
+            </div>
+            <a href="{% url 'event_list' %}" class="btn btn-primary">
+                Przeglądaj wydarzenia
+            </a>
+        </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}

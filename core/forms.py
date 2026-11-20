@@ -63,11 +63,6 @@ class RegisterForm(UserCreationForm):
 
 class ProfileForm(forms.ModelForm):
 
-    email = forms.EmailField(
-        required=True,
-        label="Adres e-mail"
-    )
-
     class Meta:
         model = Profile
 
@@ -92,34 +87,25 @@ class ProfileForm(forms.ModelForm):
             })
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        if self.instance and self.instance.pk:
-            self.fields['email'].initial = self.instance.user.email
-
-    def clean_email(self):
-        email = self.cleaned_data['email']
-
-        users = User.objects.filter(email__iexact=email)
-        users = users.exclude(pk=self.instance.user.pk)
-
-        if users.exists():
-            raise forms.ValidationError(
-                "Ten adres e-mail jest już zajęty."
-            )
-
-        return email
-
     def save(self, commit=True):
         profile = super().save(commit=False)
 
         if commit:
-            profile.user.email = self.cleaned_data['email']
             profile.user.save()
             profile.save()
 
         return profile
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for name, field in self.fields.items():
+
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
+
+            else:
+                field.widget.attrs['class'] = 'form-control'
 
 
 class EventForm(forms.ModelForm):
@@ -196,6 +182,7 @@ class EventForm(forms.ModelForm):
                 "class": "form-control",
             }),
         }
+
 
 class GameForm(forms.ModelForm):
     class Meta:

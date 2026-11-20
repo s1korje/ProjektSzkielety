@@ -6,9 +6,11 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q, Count
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 from .forms import RegisterForm, ProfileForm
-from .models import Profile, Event, PlannedEvent
-from .forms import EventForm,GameForm, OrganizerForm
+from .models import Profile, Event, PlannedEvent, Team
+from .forms import EventForm,GameForm, OrganizerForm, TeamForm
 
 class CustomLoginView(LoginView):
 
@@ -240,3 +242,48 @@ def remove_from_plan(request, event_id):
     messages.success(request, "Wydarzenie usunięto z Twojego planu.")
 
     return redirect("my_plan")
+
+@staff_member_required
+def team_create(request):
+    if request.method == "POST":
+        form = TeamForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            form.save()
+            return redirect("home")
+    else:
+        form = TeamForm()
+
+    return render(request, "core/team_create.html", {
+        "form": form
+    })
+
+@require_GET
+def teams_by_game(request):
+    game_id = request.GET.get("game_id")
+
+    if not game_id:
+        return JsonResponse({"teams": []})
+
+    teams = Team.objects.filter(
+        game_id=game_id
+    ).order_by("name")
+
+    data = {
+        "teams": [
+            {
+                "id": team.id,
+                "name": str(team),
+            }
+            for team in teams
+        ]
+    }
+
+    return JsonResponse(data)
+
+def team_list(request):
+    teams = Team.objects.select_related("game").order_by("name")
+
+    return render(request, "core/team_list.html", {
+        "teams": teams
+    })

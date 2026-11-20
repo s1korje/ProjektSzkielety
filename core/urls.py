@@ -12,4 +12,7 @@ urlpatterns = [
     path("my-plan/", views.my_plan, name="my_plan"),
     path("events/<int:event_id>/add-to-plan/", views.add_to_plan, name="add_to_plan"),
     path("events/<int:event_id>/remove-from-plan/", views.remove_from_plan, name="remove_from_plan"),
+    path("teams/", views.team_list, name="team_list"),
+    path("teams/add/",views.team_create,name="team_create"),
+    path("ajax/teams/", views.teams_by_game, name="teams_by_game"),
 ]

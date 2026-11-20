@@ -1,8 +1,9 @@
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import Profile, Event, Game, Organizer
+from .models import Profile, Event, Game, Organizer, Team
 
 class RegisterForm(UserCreationForm):
 
@@ -108,7 +109,42 @@ class ProfileForm(forms.ModelForm):
                 field.widget.attrs['class'] = 'form-control'
 
 
+class TeamSelectMultiple(forms.SelectMultiple):
+
+    def create_option(
+        self,
+        name,
+        value,
+        label,
+        selected,
+        index,
+        subindex=None,
+        attrs=None
+    ):
+        option = super().create_option(
+            name,
+            value,
+            label,
+            selected,
+            index,
+            subindex,
+            attrs
+        )
+
+        if value:
+            team_id = getattr(value, "value", value)
+
+            try:
+                team = Team.objects.get(pk=team_id)
+                option["attrs"]["data-game-id"] = str(team.game_id)
+            except (Team.DoesNotExist, ValueError, TypeError):
+                pass
+
+        return option
+
+
 class EventForm(forms.ModelForm):
+
     class Meta:
         model = Event
         fields = [
@@ -116,6 +152,7 @@ class EventForm(forms.ModelForm):
             "description",
             "game",
             "organizer",
+            "teams",
             "event_type",
             "status",
             "start_date",
@@ -124,11 +161,13 @@ class EventForm(forms.ModelForm):
             "is_online",
             "website",
         ]
+
         labels = {
             "title": "Nazwa wydarzenia",
             "description": "Opis",
             "game": "Gra",
             "organizer": "Organizator",
+            "teams": "Drużyny uczestniczące",
             "event_type": "Rodzaj wydarzenia",
             "status": "Status",
             "start_date": "Data rozpoczęcia",
@@ -151,6 +190,10 @@ class EventForm(forms.ModelForm):
             }),
             "organizer": forms.Select(attrs={
                 "class": "form-select",
+            }),
+            "teams": TeamSelectMultiple(attrs={
+                "class": "form-select",
+                "size": 6,
             }),
             "event_type": forms.Select(attrs={
                 "class": "form-select",
@@ -182,6 +225,40 @@ class EventForm(forms.ModelForm):
                 "class": "form-control",
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        game_id = None
+
+        if self.is_bound:
+            game_id = self.data.get(self.add_prefix("game"))
+        elif self.instance and self.instance.pk:
+            game_id = self.instance.game_id
+
+        if game_id:
+            self.fields["teams"].queryset = Team.objects.filter(
+                game_id=game_id
+            ).order_by("name")
+        else:
+            self.fields["teams"].queryset = Team.objects.none()
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        game = cleaned_data.get("game")
+        teams = cleaned_data.get("teams")
+
+        if game and teams:
+            invalid_teams = teams.exclude(game=game)
+
+            if invalid_teams.exists():
+                self.add_error(
+                    "teams",
+                    "Możesz przypisać tylko drużyny należące do wybranej gry."
+                )
+
+        return cleaned_data
 
 
 class GameForm(forms.ModelForm):
@@ -229,6 +306,31 @@ class OrganizerForm(forms.ModelForm):
         }
 
 
+class TeamForm(forms.ModelForm):
+    class Meta:
+        model = Team
+        fields = [
+            "name",
+            "tag",
+            "game",
+            "description",
+            "country",
+            "website",
+            "logo",
+        ]
+
+        widgets = {
+            "description": forms.Textarea(attrs={
+                "rows": 4,
+                "placeholder": "Opisz drużynę..."
+            })
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.widget.attrs["class"] = "form-control"
 
 
 def __init__(self, *args, **kwargs):

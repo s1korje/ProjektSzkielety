@@ -1,5 +1,5 @@
 {% extends 'core/base.html' %}
-
+{% load static %}
 {% block title %}Dodaj wydarzenie | Planer e-sportowy{% endblock %}
 
 {% block content %}
@@ -61,4 +61,9 @@
         </div>
     </div>
 </div>
+{% block extra_js %}
+<script>
+    const teamsUrl = "{% url 'teams_by_game' %}";
+</script>
+<script src="{% static 'core/js/event_form.js' %}"></script>
 {% endblock %}

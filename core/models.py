@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 
+
 class Profile(models.Model):
 
     user = models.OneToOneField(
@@ -69,6 +70,58 @@ class Organizer(models.Model):
         return self.name
 
 
+class Team(models.Model):
+    name = models.CharField(
+        max_length=150,
+        unique=True,
+        verbose_name="Nazwa drużyny"
+    )
+
+    tag = models.CharField(
+        max_length=20,
+        blank=True,
+        verbose_name="Tag drużyny"
+    )
+
+    game = models.ForeignKey(
+        Game,
+        on_delete=models.CASCADE
+    )
+
+    description = models.TextField(
+        blank=True,
+        verbose_name="Opis drużyny"
+    )
+
+    country = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name="Kraj"
+    )
+
+    website = models.URLField(
+        blank=True,
+        verbose_name="Strona internetowa"
+    )
+
+    logo = models.ImageField(
+        upload_to="teams/",
+        blank=True,
+        null=True,
+        verbose_name="Logo drużyny"
+    )
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Drużyna"
+        verbose_name_plural = "Drużyny"
+
+    def __str__(self):
+        if self.tag:
+            return f"{self.name} [{self.tag}]"
+        return self.name
+
+
 class Event(models.Model):
     class EventType(models.TextChoices):
         TOURNAMENT = "TOURNAMENT", "Turniej"
@@ -92,6 +145,12 @@ class Event(models.Model):
         on_delete=models.PROTECT,
         related_name="events",
     )
+    teams = models.ManyToManyField(
+        Team,
+        blank=True,
+        related_name="events",
+        verbose_name="Drużyny"
+    )
     event_type = models.CharField(
         max_length=20,
         choices=EventType.choices,
@@ -107,7 +166,7 @@ class Event(models.Model):
     location = models.CharField(max_length=200, blank=True)
     is_online = models.BooleanField(default=True)
     website = models.URLField(blank=True)
-
+    
     class Meta:
         ordering = ["start_date"]
         verbose_name = "Wydarzenie"

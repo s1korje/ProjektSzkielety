@@ -4,15 +4,14 @@
 
 {% block content %}
 
-<div class="container">
+<div class="container py-5">
 
     <div class="row justify-content-center">
+        <div class="col-12 col-md-9 col-lg-7 col-xl-6">
 
-        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0 rounded-4">
 
-            <div class="card shadow-sm border-0">
-
-                <div class="card-body p-4">
+                <div class="card-body p-4 p-md-5">
 
                     <h2 class="fw-bold text-center mb-2">
                         Edytuj profil
@@ -22,14 +21,12 @@
                         Zaktualizuj swoje dane użytkownika.
                     </p>
 
-                    <form method="POST"
-                          enctype="multipart/form-data">
-
+                    <form method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         {% for field in form %}
 
-                            <div class="mb-3">
+                            <div class="mb-4">
 
                                 <label for="{{ field.id_for_label }}"
                                        class="form-label fw-semibold">
@@ -39,7 +36,7 @@
                                 {{ field }}
 
                                 {% if field.help_text %}
-                                    <div class="form-text">
+                                    <div class="form-text mt-1">
                                         {{ field.help_text|safe }}
                                     </div>
                                 {% endif %}
@@ -60,30 +57,24 @@
                             </div>
                         {% endif %}
 
-                        <div class="d-flex justify-content-between mt-4">
+                        <hr class="my-4">
+
+                        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2">
 
                             <a href="{% url 'profile' %}"
-                               class="btn btn-outline-secondary">
+                               class="btn btn-outline-secondary px-4">
                                 Anuluj
                             </a>
 
                             <button type="submit"
-                                    class="btn btn-primary">
+                                    class="btn btn-primary px-4">
                                 Zapisz zmiany
                             </button>
-
                         </div>
-
                     </form>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
-
 {% endblock %}

@@ -1,0 +1,50 @@
+
+{% extends 'core/base.html' %}
+
+{% block title %}Potwierdź usunięcie{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm mx-auto" style="max-width: 600px;">
+        <div class="card-body p-4 text-center">
+
+            <div class="mb-3">
+                <span class="text-danger">
+                    <i class="bi bi-exclamation-triangle display-4"></i>
+                </span>
+            </div>
+
+            <h1 class="h3 mb-3">Potwierdź usunięcie</h1>
+
+            <p class="mb-4">
+                Czy na pewno chcesz usunąć
+                <strong>{{ object_name }}: {{ object }}</strong>?
+            </p>
+
+            {% if warning %}
+                <div class="alert alert-warning text-start">
+                    {{ warning }}
+                </div>
+            {% endif %}
+
+            <p class="text-danger small">
+                Tej operacji nie można cofnąć.
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <button type="submit" class="btn btn-danger">
+                    Usuń
+                </button>
+
+                <a href="{{ cancel_url }}"
+                   class="btn btn-outline-secondary ms-2">
+                    Anuluj
+                </a>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

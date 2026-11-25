@@ -15,4 +15,5 @@ urlpatterns = [
     path("teams/", views.team_list, name="team_list"),
     path("teams/add/",views.team_create,name="team_create"),
     path("ajax/teams/", views.teams_by_game, name="teams_by_game"),
+    path("events/<int:event_id>/edit/",views.event_edit,name="event_edit"),
 ]

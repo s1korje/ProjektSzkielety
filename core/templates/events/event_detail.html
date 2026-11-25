@@ -13,6 +13,12 @@
     <div class="card-body p-4">
 
         <h1 class="mb-3">{{ event.title }}</h1>
+        {% if user.is_staff %}
+            <a href="{% url 'event_edit' event.id %}"
+            class="btn btn-warning btn-sm mb-3">
+                Edytuj wydarzenie i drużyny
+            </a>
+        {% endif %}
 
         <p>
             <strong>Gra:</strong> {{ event.game.name }}

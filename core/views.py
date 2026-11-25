@@ -287,3 +287,34 @@ def team_list(request):
     return render(request, "core/team_list.html", {
         "teams": teams
     })
+
+
+@staff_member_required
+def event_edit(request, event_id):
+    event = get_object_or_404(Event, pk=event_id)
+
+    if request.method == "POST":
+        form = EventForm(
+            request.POST,
+            request.FILES,
+            instance=event
+        )
+
+        if form.is_valid():
+            form.save()
+
+            messages.success(
+                request,
+                "Wydarzenie zostało zaktualizowane!"
+            )
+
+            return redirect("event_detail", event_id=event.pk)
+
+    else:
+        form = EventForm(instance=event)
+
+    return render(request, "events/event_form.html", {
+        "form": form,
+        "page_title": "Edytuj wydarzenie",
+        "event": event,
+    })

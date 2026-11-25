@@ -1,6 +1,10 @@
+
 {% extends 'core/base.html' %}
 {% load static %}
-{% block title %}Dodaj wydarzenie | Planer e-sportowy{% endblock %}
+
+{% block title %}
+    {{ page_title|default:"Dodaj wydarzenie" }}
+{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -8,11 +12,12 @@
         <div class="col-lg-8">
             <div class="card shadow-sm">
                 <div class="card-body p-4">
+
                     <h1 class="h3 mb-4">
-                        Dodaj wydarzenie e-sportowe
+                        {{ page_title|default:"Dodaj wydarzenie e-sportowe" }}
                     </h1>
 
-                    <form method="post">
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
                         {% if form.non_field_errors %}
@@ -23,7 +28,26 @@
 
                         {% for field in form %}
                             <div class="mb-3">
-                                {% if field.field.widget.input_type == "checkbox" %}
+
+                                {% if field.name == "teams" %}
+
+                                    <label class="form-label fw-semibold">
+                                        {{ field.label }}
+                                    </label>
+
+                                    <div id="teams-checkboxes"
+                                         class="teams-grid">
+                                        <p class="text-muted small mb-0">
+                                            Wybierz najpierw grę, aby zobaczyć dostępne drużyny.
+                                        </p>
+                                    </div>
+
+                                    <div class="d-none">
+                                        {{ field }}
+                                    </div>
+
+                                {% elif field.field.widget.input_type == "checkbox" %}
+
                                     <div class="form-check">
                                         {{ field }}
                                         <label class="form-check-label"
@@ -31,24 +55,32 @@
                                             {{ field.label }}
                                         </label>
                                     </div>
+
                                 {% else %}
+
                                     <label class="form-label"
                                            for="{{ field.id_for_label }}">
                                         {{ field.label }}
                                     </label>
                                     {{ field }}
+
                                 {% endif %}
 
                                 {% for error in field.errors %}
-                                    <div class="text-danger small">
+                                    <div class="text-danger small mt-1">
                                         {{ error }}
                                     </div>
                                 {% endfor %}
+
                             </div>
                         {% endfor %}
 
                         <button type="submit" class="btn btn-primary">
-                            Zapisz wydarzenie
+                            {% if event %}
+                                Zapisz zmiany
+                            {% else %}
+                                Zapisz wydarzenie
+                            {% endif %}
                         </button>
 
                         <a href="{% url 'event_list' %}"
@@ -56,11 +88,56 @@
                             Anuluj
                         </a>
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .teams-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 10px;
+    }
+
+    .team-tile {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        cursor: pointer;
+        background: var(--bs-body-bg);
+        transition: border-color 0.2s, background-color 0.2s;
+    }
+
+    .team-tile:hover {
+        border-color: var(--bs-primary);
+    }
+
+    .team-tile:has(input:checked) {
+        border-color: var(--bs-primary);
+        background-color: rgba(13, 110, 253, 0.09);
+    }
+
+    .team-tile input {
+        width: 17px;
+        height: 17px;
+        flex-shrink: 0;
+        cursor: pointer;
+    }
+
+    .team-tile-name {
+        font-weight: 500;
+        font-size: 0.95rem;
+        overflow-wrap: anywhere;
+    }
+</style>
+{% endblock %}
+
 {% block extra_js %}
 <script>
     const teamsUrl = "{% url 'teams_by_game' %}";

@@ -1,0 +1,84 @@
+
+{% extends 'core/base.html' %}
+
+{% block title %}Organizatorzy - Planer e-sportowy{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+
+        <div>
+            <h1 class="h2 fw-bold mb-1">Organizatorzy wydarzeń</h1>
+            <p class="text-muted mb-0">
+                Lista wszystkich organizatorów w bazie danych.
+            </p>
+        </div>
+
+        {% if user.is_staff %}
+            <a href="{% url 'organizer_create' %}"
+               class="btn btn-primary">
+                Dodaj organizatora
+            </a>
+        {% endif %}
+
+    </div>
+
+    {% if organizers %}
+        <div class="row g-4">
+
+            {% for organizer in organizers %}
+                <div class="col-12 col-md-6 col-lg-4">
+
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+
+                            <h2 class="h5 fw-bold mb-3">
+                                {{ organizer.name }}
+                            </h2>
+
+                            {% if organizer.email %}
+                                <p class="mb-2">
+                                    <strong>E-mail:</strong>
+                                    {{ organizer.email }}
+                                </p>
+                            {% endif %}
+
+                            {% if organizer.website %}
+                                <p class="mb-3">
+                                    <strong>Strona:</strong>
+                                    <a href="{{ organizer.website }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer">
+                                        Odwiedź stronę
+                                    </a>
+                                </p>
+                            {% endif %}
+
+                            <p class="text-muted small mb-3">
+                                Liczba wydarzeń: {{ organizer.events.count }}
+                            </p>
+
+                            {% if user.is_staff %}
+                                <a href="{% url 'organizer_delete' organizer.id %}"
+                                   class="btn btn-danger btn-sm">
+                                    Usuń organizatora
+                                </a>
+                            {% endif %}
+
+                        </div>
+                    </div>
+
+                </div>
+            {% endfor %}
+
+        </div>
+
+    {% else %}
+        <div class="alert alert-info">
+            Nie dodano jeszcze żadnych organizatorów.
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

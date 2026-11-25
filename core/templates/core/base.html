@@ -42,22 +42,13 @@
                     href="{% url 'team_list' %}">
                     Drużyny
                 </a>
-
+                
                 {% if user.is_authenticated and user.is_staff %}
-
-                    <a class="nav-link text-light"
-                       href="{% url 'game_create' %}">
+                    <a class="nav-link text-light" href="{% url 'organizer_list' %}">
+                        Organizatorzy
+                    </a>
+                    <a class="nav-link text-light" href="{% url 'game_create' %}">
                         Dodaj grę
-                    </a>
-
-                    <a class="nav-link text-light"
-                       href="{% url 'organizer_create' %}">
-                        Dodaj organizatora
-                    </a>
-
-                    <a class="nav-link text-light"
-                        href="{% url 'team_create' %}">
-                        Dodaj drużynę
                     </a>
 
                 {% endif %}
